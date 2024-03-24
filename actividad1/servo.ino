@@ -2,38 +2,31 @@
 #include <stdint.h>
 
 // Definimos los pines a utilizar
-const int PIN_PWM = 9; //OC1A
-const int PIN_POTE = A0;
-const int MAXIMO_POTE = 682;
-const int MINIMO = 1200;
-const int MAXIMO = 4900;
-const int TOP = 39999;
-const unsigned int PERIODO_PWM = 200;
+#define PIN_PWM 9 //OC1A
+#define PIN_POTE A0
+#define MAXIMO_POTE 682
+#define MINIMO 1200
+#define MAXIMO 4900
+#define TOP 39999
+#define FRECUENCIA_LECTURA 100
+uint16_t periodo_lectura;
+uint16_t tiempo_inicial = 0;
+uint16_t tiempo_final = 0;
 
 void setup() {
   Serial.begin(115200);
   pinMode(PIN_PWM, OUTPUT);
   config_50_hz();
-  delay(100);
-
-  int valor_pote = analogRead(PIN_POTE);
-
-  OCR1A = procesar_valor_pote(valor_pote);
-  
-  delay(1000);
+  periodo_lectura = 1e3/FRECUENCIA_LECTURA;
 }
 
 void loop() {
-  unsigned int tiempo_inicial = millis();
-
+  // Utilizamos millis() en lugar de micros() porque esta última llega hasta 65536 (2^16) y necesitaríamos del orden de los 10^6 para 10 Hz
+  tiempo_inicial = millis();
   int valor_pote = analogRead(PIN_POTE);
-
   OCR1A = procesar_valor_pote(valor_pote);
-
-  unsigned int tiempo_final = millis();
-
-  
-  delay(PERIODO_PWM - (tiempo_final - tiempo_inicial));
+  tiempo_final = millis();
+  delay(periodo_lectura - (tiempo_final - tiempo_inicial));
 }
 
 
