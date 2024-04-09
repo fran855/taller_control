@@ -21,6 +21,9 @@ float dt = 0;
 
 float angulo_gir_x = 0;
 float angulo_accel_x = 0;
+float angulo_x = 0;
+
+float alpha = 0.98;
 
 const long int periodo_lectura = 10000;
 
@@ -49,10 +52,14 @@ void loop() {
   
   current_time = micros();
   dt = (current_time - prev_time) / 1e6;
+  obtener_angulo_giroscopo_x();
   obtener_angulo_accel_x();
   prev_time = current_time;
   
+  angulo_x = alpha*angulo_gir_x + (1-alpha)*angulo_accel_x;
 
+  Serial.print("Ángulo x: ");
+  Serial.println(angulo_x);
   tiempo_final = micros();
   delayMicroseconds(periodo_lectura - (tiempo_final - tiempo_inicial));
 }
@@ -61,23 +68,12 @@ void obtener_angulo_giroscopo_x() {
   sensors_event_t a, g, temp;
   mpu.getEvent(&a, &g, &temp);
   
-  angulo_gir_x = angulo_gir_x + (g.gyro.x-offset_giro_x) * dt * 180 / M_PI; 
-
-  Serial.print("Ángulo x: ");
-  Serial.println(angulo_gir_x);
+  angulo_gir_x = angulo_x + (g.gyro.x-offset_giro_x) * dt * 180 / M_PI; 
 }
 
 void obtener_angulo_accel_x() {
   sensors_event_t a, g, temp;
   mpu.getEvent(&a, &g, &temp);
 
-  Serial.print("Accel y: ");
-  Serial.println(a.acceleration.y);
-  Serial.print("Accel z: ");
-  Serial.println(a.acceleration.z);
-
   angulo_accel_x  = atan2(a.acceleration.y-offset_accel_y, a.acceleration.z-offset_accel_z) * 180 / M_PI;
-
-  Serial.print("Ángulo x: ");
-  Serial.println(angulo_accel_x);
 }
