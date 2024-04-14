@@ -37,14 +37,14 @@ Pmp = Ps;
 % Primer acercamiento: PI
 Cs = zpk([], [0], -1);
 L =  minreal(Ps * Cs);
-%bode(L)
+bode(L)
 % Notamos que para un MF 60° se tienen 61.3 dB
 
 %k = db2mag(-61.3+17.6+41.3);
 k = db2mag(-3);
 Cs = zpk([], [0], -k);
 L =  minreal(Ps * Cs);
-%bode(L)
+bode(L)
 
 % Definición de la función Pd(s)
 s = tf('s');
@@ -57,8 +57,8 @@ L = minreal(Pap * Pmp * Cs);
 
 red = zpk([-0.005], [-0.2], 1);
 
-%figure;
-%hold on;
-%bode(minreal(L*red))
+figure;
+hold on;
+bode(minreal(L*red))
 
-Cs_final = Cs * Pap * red;
+Cs_final = Cs * Pap * red
