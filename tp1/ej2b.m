@@ -29,4 +29,14 @@ B_eval = eval(B);
 C_eval = eval(C);
 D_eval = eval(D);
 
-P = zpk(ss(A_eval,B_eval,C_eval,D_eval));
+Ps = zpk(ss(A_eval,B_eval,C_eval,D_eval));
+Cs = zpk([],[0],-1);
+
+optionss=bodeoptions;
+optionss.MagVisible='on';
+optionss.PhaseMatching='on';
+optionss.PhaseMatchingValue=-180;
+optionss.PhaseMatchingFreq=1;
+optionss.Grid='on';
+
+bode(Ps*Cs, optionss)
