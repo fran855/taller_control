@@ -1,3 +1,7 @@
+clear all
+close all
+clc
+
 syms H L L_s L_i A_o Q_i h u g u0 h0 s;
 
 f = (H^2 * (Q_i - A_o * sqrt(2*g*h)*u))/(h^2*(L_s-L_i)^2 + 2*h*L_i*(L_s-L_i)*H+L_i^2*H^2) ;
@@ -62,3 +66,5 @@ red = zpk([-0.005], [-0.2], 1);
 %bode(minreal(L*red))
 
 Cs_final = Cs * Pap * red;
+
+disp("Fin")
