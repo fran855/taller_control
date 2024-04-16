@@ -52,14 +52,16 @@ L =  minreal(Ps * Cs);
 
 % Definición de la función Pd(s)
 s = tf('s');
-Pap = (1-36/4*s)/(1+36/4*s);
+% Ts = 36;
+Ts = 1;
+Pap = (1-Ts/4*s)/(1+Ts/4*s);
 Pd1 = (1-10/4*s)/(1+10/4*s);
 Pd2 = (1-48/4*s)/(1+48/4*s);
 Pd3 = (1-200/4*s)/(1+200/4*s);
 
 L = minreal(Pap * Pmp * Cs);
 
-red = zpk([-0.005], [-0.2], 1);
+red = zpk([-0.0075], [-0.225], 1);
 
 %figure;
 %hold on;
