@@ -29,4 +29,5 @@ B_eval = eval(B);
 C_eval = eval(C);
 D_eval = eval(D);
 
+planta_generica = C*(s - A)^(-1) * B + D;
 planta = zpk(ss(A_eval,B_eval,C_eval,D_eval));

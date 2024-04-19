@@ -45,7 +45,7 @@ L =  minreal(Ps * Cs);
 % Notamos que para un MF 60° se tienen 61.3 dB
 
 %k = db2mag(-61.3+17.6+41.3);
-k = db2mag(-3);
+k = db2mag(13);
 Cs = zpk([], [0], -k);
 L =  minreal(Ps * Cs);
 %bode(L)
@@ -61,11 +61,11 @@ Pd3 = (1-200/4*s)/(1+200/4*s);
 
 L = minreal(Pap * Pmp * Cs);
 
-red = zpk([-0.0075], [-0.225], 1);
+red = zpk([-0.0023], [], 1);
 
-%figure;
-%hold on;
-%bode(minreal(L*red))
+figure;
+hold on;
+bode(minreal(L*red))
 
 Cs_final = Cs * Pap * red;
 
