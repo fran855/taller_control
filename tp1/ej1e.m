@@ -11,6 +11,10 @@ D = jacobian(y, u);
 
 %Definicion de constantes
 g = 9.8;        %En metros sobre segundo cuadrado
+
+
+
+
 H = 0.9;        %En metros
 L_s = 0.4;      %En metros
 L_i = 0.1;      %En metros
