@@ -61,14 +61,11 @@ Pd3 = (1-200/4*s)/(1+200/4*s);
 
 L = minreal(Pap * Pmp * Cs);
 
-%red = zpk([-0.005], [-0.2], 1);
-%red = zpk([-0.0075], [-0.225], 1);
+red = zpk([-0.0075], [-0.225], 1);
 
-red = zpk([-0.00237], [], 1);
-
-figure;
-hold on;
-bode(minreal(L*red))
+%figure;
+%hold on;
+%bode(minreal(L*red))
 
 Cs_final = Cs * Pap * red;
 

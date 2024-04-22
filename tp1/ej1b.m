@@ -1,3 +1,7 @@
+clear all;
+close all;
+clc;
+
 syms H L L_s L_i A_o Q_i h u g u0 h0 s;
 
 f = (H^2 * (Q_i - A_o * sqrt(2*g*h)*u))/(h^2*(L_s-L_i)^2 + 2*h*L_i*(L_s-L_i)*H+L_i^2*H^2) ;
@@ -29,5 +33,5 @@ B_eval = eval(B);
 C_eval = eval(C);
 D_eval = eval(D);
 
-planta_generica = C*(s - A)^(-1) * B + D;
-planta = zpk(ss(A_eval,B_eval,C_eval,D_eval));
+planta = simplify(C_eval*(s - A_eval)^(-1) * B_eval + D_eval);
+planta2 = C_eval*(s - A_eval)^(-1) * B_eval + D_eval;
