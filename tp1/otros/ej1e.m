@@ -11,10 +11,6 @@ D = jacobian(y, u);
 
 %Definicion de constantes
 g = 9.8;        %En metros sobre segundo cuadrado
-
-
-
-
 H = 0.9;        %En metros
 L_s = 0.4;      %En metros
 L_i = 0.1;      %En metros
@@ -59,7 +55,7 @@ for i = 1:length(P_list)
 end
 
 hold off;   
-
 % Agregar leyenda y título al diagrama
-legend('P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P8');  % Ajusta las leyendas según tus sistemas
-title('Diagrama de Bode para sistemas en P\_list');
+legend('h_0 = 0.10', 'h_0 = 0.20', 'h_0 = 0.30', 'h_0 = 0.40', 'h_0 = 0.50', 'h_0 = 0.60', 'h_0 = 0.70', 'h_0 = 0.80');  % Ajusta las leyendas según tus sistemas
+title('Diagrama de Bode');
+grid on;

@@ -26,14 +26,18 @@ for p = 0.0025 : 0.0001 : 0.0035
 end
 
 % Elegimos 0.003
-p = 0.003;
+p = 0.0028;
 K = -0.3747 * p;
+
+Ps1 = K/(s+p);
 
 figure();
 plot(t, h);
 hold on;
 y = A * exp(-p * t) - cte;
-plot(t, y)
+plot(t, A * exp(-0.003 * t) - cte, 'DisplayName', '0.003')
+plot(t, A * exp(-0.0028 * t) - cte, 'DisplayName', '0.0028')
+legend('show')
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 2. Discretización de la transferencia
@@ -58,10 +62,10 @@ p_s = -A;
 k_s = -B;
 
 s = tf('s');
-Ps = - k_s / (s + p_s);
+Ps2 = - k_s / (s + p_s);
 
 % La solución general para P(s) = -K / (s+p) es y(t) = A e^(-pt) - K/p
 figure()
 plot(t,h)
 hold on;
-step(Ps*(u(2)-u(1))+h(1))
+step(Ps2*(u(2)-u(1))+h(1))
