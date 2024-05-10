@@ -4,7 +4,8 @@
 // Definimos los pines a utilizar
 #define PIN_PWM 9 //OC1A
 #define PIN_POTE A0
-#define MAXIMO_POTE 682
+#define MINIMO_POTE 10
+#define MAXIMO_POTE 712
 #define MINIMO 1350
 #define MAXIMO 5100
 #define TOP 39999
@@ -25,24 +26,22 @@ void setup() {
 void loop() {
   // Utilizamos millis() en lugar de micros() porque esta última llega hasta 65536 (2^16) y necesitaríamos del orden de los 10^6 para 10 Hz
   tiempo_inicial = millis();
+  int angle;
+  while (Serial.available() > 0) {
+    angle = Serial.read();
+  }
+  OCR1A = angulo_a_servo(angle);
+
   int valor_pote = analogRead(PIN_POTE);
-  procesar_valor_pote_v3(valor_pote);
-  OCR1A = MINIMO + 700;
-  delay(3000);
-
-  procesar_valor_pote_v3(valor_pote);
-  OCR1A = (MINIMO + MAXIMO)/2;
-  delay(3000);
+  int angulo = convertir_a_angulo(valor_pote);
   
-  procesar_valor_pote_v3(valor_pote);
-  OCR1A = MAXIMO - 700;
-  delay(3000);
+  //matlab_send(angulo, 0, 0);
 
-  procesar_valor_pote_v3(valor_pote);
-  OCR1A = (MINIMO + MAXIMO)/2;
-  delay(3000);
-  
+  matlab_send(angulo, tiempo_inicial, tiempo_final);
+
   tiempo_final = millis();
+
+  delay(periodo_lectura - (tiempo_final - tiempo_inicial));
 }
 
 
@@ -52,37 +51,28 @@ void config_50_hz(){
   ICR1 = TOP;
 }
 
-uint16_t procesar_valor_pote_v2(int valor_pote){
-  if(valor_pote > 579){
-    Serial.println("Angulo permitido superado");
-    return (uint16_t) 6436;
-  }
-  if(valor_pote < 9){
-    Serial.println("Angulo permitido superado");
-    return (uint16_t) 320;
-  }
-  uint16_t angulo = map(valor_pote, 9, 579, 3, 181);
-  Serial.print("Ángulo: ");
-  Serial.println(angulo);
-  return map(valor_pote, 9, 579, 320, 6436);
+
+int procesar_valor_pote(int valor_pote){
+    //int angulo = map(valor_pote, MINIMO_POTE, MAXIMO_POTE, 0, 180);
+    //Serial.print("Ángulo: ");
+    //Serial.println(angulo);
+    return map(valor_pote, MINIMO_POTE, MAXIMO_POTE, MINIMO, MAXIMO);
 }
 
-uint16_t procesar_valor_pote(int valor_pote){
-  if(valor_pote > MAXIMO_POTE){
-    Serial.println("Ángulo superado. Recortado a 180°");
-    return (uint16_t) MAXIMO;
-  }
-  else{
-    uint16_t angulo = map(valor_pote, 0, MAXIMO_POTE, 0, 180);
-    Serial.print("Ángulo: ");
-    Serial.println(angulo);
-    return map(valor_pote, 0, MAXIMO_POTE, MINIMO, MAXIMO);
-  }
+int convertir_a_angulo(int valor_pote){
+  return map(valor_pote, MINIMO_POTE, MAXIMO_POTE, 0, 180);
 }
 
-uint16_t procesar_valor_pote_v3(int valor_pote){
-  uint16_t angulo = map(valor_pote, 0, MAXIMO_POTE, 0, 180);
-  Serial.print("Ángulo: ");
-  Serial.println(angulo);
-  return map(valor_pote, 0, MAXIMO_POTE, MINIMO, MAXIMO);
+int angulo_a_servo(int angulo){
+  return map(angulo, 0, 180, MINIMO, MAXIMO);
+}
+
+void matlab_send(float dato1, float dato2, float dato3){
+  Serial.write("abcd");
+  byte * b = (byte *) &dato1;
+  Serial.write(b,4);
+  b = (byte *) &dato2;
+  Serial.write(b,4);
+  b = (byte *) &dato3;
+  Serial.write(b,4);
 }
