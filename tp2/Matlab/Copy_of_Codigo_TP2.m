@@ -7,13 +7,13 @@ aux2 = 0;
 
 s = tf('s');
 
-load('identificacion_con_imu_5_grados.mat');
+load('identificacion_con_imu_15_grados.mat');
 pulso = out.d1;
 angulo = out.d2;
 tiempo = out.tout;
 
-delay = 1209;
-angulo = angulo(delay:length(angulo));
+delay = 910;
+angulo = angulo(delay:length(angulo)) - 1.85;
 tiempo = tiempo(delay:length(tiempo)) - tiempo(delay);
 
 a = 450;
@@ -25,7 +25,7 @@ lb = 0.18;
 lp = 0.13;
 mp = 0.05;
 g = 9.8;
-gamma = 0.09;
+gamma = 0.2;
 
 
 figure();
