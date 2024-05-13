@@ -9,6 +9,7 @@ tiempo = out.tout;
 
 N = length(angulo);
 
+
 angulo_modelado_1 = angulo(806:N) - 91; 
 tiempo_modelado_1 = tiempo(806:N) - tiempo(806);
 angulo_modelado_2 = angulo(406:N) - 91;
