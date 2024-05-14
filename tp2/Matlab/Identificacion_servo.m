@@ -24,19 +24,23 @@ c = 450;
 P = tf(a, [1 b c]);
 
 figure();
-plot(tiempo_modelado_1, angulo_modelado_1);
+plot(tiempo_modelado_1, angulo_modelado_1, 'r', 'linewidth', 2);
 hold on;
 opt = stepDataOptions('StepAmplitude', 30);
-step(P, opt);
-title(['a = ', num2str(a), '  b = ', num2str(b), '  c = ', num2str(c)]);
+[y, t] = step(P, opt);
+plot(t,y,'b','linewidth',2)
+grid on;
+title('Respuestas al escalón de la planta propuesta y real superpuestas');
 xlim([0 0.4]);
 
 figure();
-plot(tiempo_modelado_2, angulo_modelado_2);
+plot(tiempo_modelado_2, angulo_modelado_2, 'r', 'linewidth', 2);
 hold on;
 opt = stepDataOptions('InputOffset', 30, 'StepAmplitude', -30);
-step(P, opt);
-title(['a = ', num2str(a), '  b = ', num2str(b), '  c = ', num2str(c)]);
+[y, t] = step(P, opt);
+plot(t,y,'b', 'linewidth',2)
+grid on;
+title('Respuestas al escalón de la planta propuesta y real superpuestas');
 xlim([0 0.4]);
 
 figure();

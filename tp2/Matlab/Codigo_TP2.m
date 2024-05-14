@@ -36,8 +36,9 @@ for alpha = 0
         Gtotal = Gpendulo * Gservo;
         opt = stepDataOptions('StepAmplitude', 30);
         [y1, t1] = step(Gtotal, opt);
-        plot(t1, y1);
+        plot(t1, y1, 'b', 'linewidth', 2);
         hold on;
+        grid on
     end
 end
 
