@@ -2,47 +2,71 @@ close all
 clc
 clear all
 
-aux1 = 0;
-aux2 = 0;
+load('identificacion_con_imu.mat');
 
-s = tf('s');
-
-load('identificacion_con_imu_15_grados.mat');
-pulso = out.d1;
-angulo = out.d2;
+angulo = out.d1;
 tiempo = out.tout;
 
-delay = 910;
-angulo = angulo(delay:length(angulo)) - 1.85;
-tiempo = tiempo(delay:length(tiempo)) - tiempo(delay);
+N = length(angulo);
+
+
+angulo_modelado_1 = angulo(806:N) - 91; 
+tiempo_modelado_1 = tiempo(806:N) - tiempo(806);
+angulo_modelado_2 = angulo(406:N) - 91;
+tiempo_modelado_2 = tiempo(406:N) - tiempo(406);
+angulo_modelado_3 = angulo(2404:N) - 91;
+tiempo_modelado_3 = tiempo(2404:N) - tiempo(2404);
 
 a = 450;
 b = 40;
 c = 450;
 
-lb = 0.18;
-%lp = 0.21;
-lp = 0.13;
-mp = 0.05;
-g = 9.8;
-gamma = 0.2;
+P = tf(a, [1 b c]);
+
+%%
+figure();
+plot(tiempo_modelado_1, angulo_modelado_1, 'r', 'linewidth', 2);
+hold on;
+opt = stepDataOptions('StepAmplitude', 30);
+[y, t] = step(P, opt);
+salida1 = y;
+entrada1 = angulo_modelado_1(1:length(salida1));
+plot(t,y,'b','linewidth',2)
+grid on;
+title('Respuestas al escalón de la planta propuesta y real superpuestas');
+xlim([0 0.4]);
+
+%%
+figure();
+plot(tiempo_modelado_2, angulo_modelado_2, 'r', 'linewidth', 2);
+hold on;
+opt = stepDataOptions('InputOffset', 30, 'StepAmplitude', -30);
+[y, t] = step(P, opt);
+salida2 = y;
+entrada2 = angulo_modelado_2(1:length(salida2));
+plot(t,y,'b', 'linewidth',2)
+grid on;
+title('Respuestas al escalón de la planta propuesta y real superpuestas');
+xlim([0 0.4]);
+%{
+figure();
+plot(tiempo_modelado_3, angulo_modelado_3);
+hold on;
+opt = stepDataOptions('StepAmplitude', 30);
+step(P, opt);
+title(['a = ', num2str(a), '  b = ', num2str(b), '  c = ', num2str(c)]);
+xlim([0 0.4]);
 
 
 figure();
-for alpha = 0
-    for aux2 = 0
-        Gservo = tf(a+aux2, [1 b+aux1 c+aux2]);
-        Gpendulo = tf([lb/lp 0 0], [1 gamma/mp g/lp]);
-        Gtotal = Gpendulo * Gservo;
-        opt = stepDataOptions('StepAmplitude', 30);
-        [y1, t1] = step(Gtotal, opt);
-        plot(t1, y1);
-        hold on;
-    end
+plot(tiempo_modelado(578:1759)-5.76, angulo_modelado(578:1759));
+for a = 4500:500:4500
+    hold on;
+    c = a;
+    
+    
+    i = i+1;
 end
 
-xlim([0 4]);
-plot(tiempo, angulo+2.2, 'linewidth', 2);
-title(['Gamma = ', num2str(gamma)]);
-
-
+title(['a = 4500 b = 400 c = 4500']);
+%}

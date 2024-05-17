@@ -28,6 +28,7 @@ plot(tiempo_modelado_1, angulo_modelado_1, 'r', 'linewidth', 2);
 hold on;
 opt = stepDataOptions('StepAmplitude', 30);
 [y, t] = step(P, opt);
+salida1 = y;
 plot(t,y,'b','linewidth',2)
 grid on;
 title('Respuestas al escalón de la planta propuesta y real superpuestas');
@@ -38,11 +39,12 @@ plot(tiempo_modelado_2, angulo_modelado_2, 'r', 'linewidth', 2);
 hold on;
 opt = stepDataOptions('InputOffset', 30, 'StepAmplitude', -30);
 [y, t] = step(P, opt);
+salida2 = y;
 plot(t,y,'b', 'linewidth',2)
 grid on;
 title('Respuestas al escalón de la planta propuesta y real superpuestas');
 xlim([0 0.4]);
-
+%{
 figure();
 plot(tiempo_modelado_3, angulo_modelado_3);
 hold on;
@@ -51,7 +53,7 @@ step(P, opt);
 title(['a = ', num2str(a), '  b = ', num2str(b), '  c = ', num2str(c)]);
 xlim([0 0.4]);
 
-%{
+
 figure();
 plot(tiempo_modelado(578:1759)-5.76, angulo_modelado(578:1759));
 for a = 4500:500:4500
