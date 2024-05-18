@@ -27,12 +27,9 @@ uint16_t tiempo_inicial = 0;
 uint16_t tiempo_final = 0;
 
 float offset_giro_x = -0.04;
-float offset_giro_y = 0.03;
-float offset_giro_z = 0;
 
-float offset_accel_x = 1.13;
-float offset_accel_y = 0.39;
-float offset_accel_z = -0.75;
+float offset_accel_y = -0.03;
+float offset_accel_z = 0.17;
 
 float angulo_gir_x = 0;
 float angulo_accel_x = 0;
@@ -48,12 +45,9 @@ void setup() {
 
   // Config IMU
   // Try to initialize!
-
-	if (!mpu.begin()) {
+  while(!mpu.begin()){
 		Serial.println("Failed to find MPU6050 chip");
-		while (1) {
-		  delay(10);
-		}
+		delay(10);
 	}
 	Serial.println("MPU6050 Found!");
 	
@@ -92,7 +86,7 @@ void loop() {
 
   OCR1A = angulo_a_servo(angulo_a_mover);
 
-  matlab_send(u, OCR1A, error);
+  matlab_send(angulo_x, angulo_a_mover, error);
 
   tiempo_final = micros();
   delayMicroseconds(periodo_lectura - (tiempo_final - tiempo_inicial));
