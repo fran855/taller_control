@@ -37,8 +37,8 @@ float angulo_x = 0;
 float referencia = 0;
 
 float alpha = 0.98;
-float kp = 0.04;
-float u = 90;
+float kp = 0.5;
+float u = 0;
 
 void setup() {
   Serial.begin(115200);
@@ -72,17 +72,15 @@ void loop() {
   angulo_x = alpha*angulo_gir_x + (1-alpha)*angulo_accel_x;
 
   float error = angulo_x - referencia;
-  if(error < 4 && error > -4)
-    u = u;
-  else
-    u = u + kp * error;
-  
-  if(u > LIMITE_ANGULO_SUPERIOR)
-    u = LIMITE_ANGULO_SUPERIOR;
-  if(u < LIMITE_ANGULO_INFERIOR)
-    u = LIMITE_ANGULO_INFERIOR;
 
-  angulo_a_mover = u;
+  u = kp * error;
+
+  angulo_a_mover = u + 90;
+
+  if(angulo_a_mover > LIMITE_ANGULO_SUPERIOR)
+    angulo_a_mover = LIMITE_ANGULO_SUPERIOR;
+  if(angulo_a_mover < LIMITE_ANGULO_INFERIOR)
+    angulo_a_mover = LIMITE_ANGULO_INFERIOR;
 
   OCR1A = angulo_a_servo(angulo_a_mover);
 
