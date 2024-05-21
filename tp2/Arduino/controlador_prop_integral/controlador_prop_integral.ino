@@ -27,12 +27,9 @@ uint16_t tiempo_inicial = 0;
 uint16_t tiempo_final = 0;
 
 float offset_giro_x = -0.04;
-float offset_giro_y = 0.03;
-float offset_giro_z = 0;
 
-float offset_accel_x = 1.13;
-float offset_accel_y = 0.39;
-float offset_accel_z = -0.75;
+float offset_accel_y = -0.03;
+float offset_accel_z = 0.17;
 
 float angulo_gir_x = 0;
 float angulo_accel_x = 0;
@@ -40,20 +37,25 @@ float angulo_x = 0;
 float referencia = 0;
 
 float alpha = 0.98;
-float kp = 0.04;
-float u = 90;
+float T = 0.01;
+
+float kp = 0.8;
+float ki = 2;
+
+float error_actual = 0;
+float error_anterior = 0;
+float u_actual = 0;
+float i_actual = 0;
+float i_anterior = 0;
 
 void setup() {
   Serial.begin(115200);
 
   // Config IMU
   // Try to initialize!
-
-	if (!mpu.begin()) {
+  while(!mpu.begin()){
 		Serial.println("Failed to find MPU6050 chip");
-		while (1) {
-		  delay(10);
-		}
+		delay(10);
 	}
 	Serial.println("MPU6050 Found!");
 	
@@ -65,6 +67,7 @@ void setup() {
   config_50_hz();
   periodo_lectura = 1e6/FRECUENCIA_LECTURA;
   OCR1A = 3200;
+  delay(1000);
 }
 
 void loop() {
@@ -76,23 +79,24 @@ void loop() {
   obtener_angulo_accel_x();
   
   angulo_x = alpha*angulo_gir_x + (1-alpha)*angulo_accel_x;
+  i_actual = i_anterior + T/2 * error_actual + T/2 * error_anterior;
+  error_actual = angulo_x - referencia;
+  u_actual = kp * error_actual + ki * i_actual;
 
-  float error = angulo_x - referencia;
-  if(error < 4 && error > -4)
-    u = u;
-  else
-    u = u + kp * error;
-  
-  if(u > LIMITE_ANGULO_SUPERIOR)
-    u = LIMITE_ANGULO_SUPERIOR;
-  if(u < LIMITE_ANGULO_INFERIOR)
-    u = LIMITE_ANGULO_INFERIOR;
+  angulo_a_mover = u_actual + 90;
 
-  angulo_a_mover = u;
+
+  error_anterior = error_actual;
+  i_anterior = i_actual;
+
+  if(angulo_a_mover > LIMITE_ANGULO_SUPERIOR)
+    angulo_a_mover = LIMITE_ANGULO_SUPERIOR;
+  if(angulo_a_mover < LIMITE_ANGULO_INFERIOR)
+    angulo_a_mover = LIMITE_ANGULO_INFERIOR;
 
   OCR1A = angulo_a_servo(angulo_a_mover);
 
-  matlab_send(u, OCR1A, error);
+  matlab_send(u_actual, error_actual, angulo_x);
 
   tiempo_final = micros();
   delayMicroseconds(periodo_lectura - (tiempo_final - tiempo_inicial));
@@ -140,4 +144,4 @@ void obtener_angulo_accel_x() {
   mpu.getEvent(&a, &g, &temp);
 
   angulo_accel_x  = atan2(a.acceleration.y-offset_accel_y, a.acceleration.z-offset_accel_z) * 180 / M_PI;
-}
+} 
