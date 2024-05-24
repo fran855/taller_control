@@ -61,7 +61,7 @@ void setup() {
   pinMode(PIN_PWM, OUTPUT);
   config_50_hz();
   periodo_lectura = 1e6/FRECUENCIA_LECTURA;
-  OCR1A = angulo_a_servo(LIMITE_ANGULO_SUPERIOR);
+  OCR1A = angulo_a_servo(90);
   delay(1000);
 }
 
@@ -89,7 +89,7 @@ void loop() {
 
   float angulo_pote = convertir_a_angulo(analogRead(PIN_POTE));
 
-  matlab_send(angulo_x, angulo_pote, 0);
+  matlab_send(angulo_x, 0, 0);
 
   tiempo_final = micros();
   float espera = periodo_lectura - (tiempo_final - tiempo_inicial);

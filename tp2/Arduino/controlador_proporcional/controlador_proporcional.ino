@@ -36,7 +36,7 @@ float angulo_x = 0;
 float referencia = 0;
 
 float alpha = 0.98;
-float kp = 0.2;
+float kp = 0.8;
 float u = 0;
 
 void setup() {
