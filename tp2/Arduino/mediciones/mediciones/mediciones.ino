@@ -35,8 +35,12 @@ float angulo_accel_x = 0;
 float angulo_x = 0;
 float referencia = 0;
 
+float aux_giro_x = 0;
+float aux_accel_y = 0;
+float aux_accel_z = 0;
+
 float alpha = 0.98;
-float kp = 0.2;
+float kp = 0.5;
 float u = 0;
 
 void setup() {
@@ -57,39 +61,41 @@ void setup() {
   pinMode(PIN_PWM, OUTPUT);
   config_50_hz();
   periodo_lectura = 1e6/FRECUENCIA_LECTURA;
-  OCR1A = 3200;
+  OCR1A = angulo_a_servo(LIMITE_ANGULO_SUPERIOR);
+  delay(1000);
 }
 
 void loop() {
   // Utilizamos millis() en lugar de micros() porque esta última llega hasta 65536 (2^16) y necesitaríamos del orden de los 10^6 para 10 Hz
   tiempo_inicial = micros();
-  float angulo_a_mover;
-  
+  float angulo, angulo_a_mover;
+  while (Serial.available() > 0) {
+    angulo = Serial.read();
+  }
+
+  if(angulo > LIMITE_ANGULO_SUPERIOR)
+    angulo_a_mover = LIMITE_ANGULO_SUPERIOR;
+  else if(angulo < LIMITE_ANGULO_INFERIOR)
+    angulo_a_mover = LIMITE_ANGULO_INFERIOR;
+  else
+    angulo_a_mover = angulo;
+
+  OCR1A = angulo_a_servo(angulo_a_mover);
+
   obtener_angulo_giroscopo_x();
   obtener_angulo_accel_x();
   
   angulo_x = alpha*angulo_gir_x + (1-alpha)*angulo_accel_x;
 
-  float error = angulo_x - referencia;
+  float angulo_pote = convertir_a_angulo(analogRead(PIN_POTE));
 
-  u = kp * error;
-
-  angulo_a_mover = u + 90;
-
-  if(angulo_a_mover > LIMITE_ANGULO_SUPERIOR)
-    angulo_a_mover = LIMITE_ANGULO_SUPERIOR;
-  if(angulo_a_mover < LIMITE_ANGULO_INFERIOR)
-    angulo_a_mover = LIMITE_ANGULO_INFERIOR;
-
-  OCR1A = angulo_a_servo(angulo_a_mover);
-
-  matlab_send(angulo_x, angulo_a_mover, error);
+  matlab_send(angulo_x, angulo_pote, 0);
 
   tiempo_final = micros();
-  
-  int diferencia = periodo_lectura - (tiempo_final - tiempo_inicial);
-  if(diferencia < 0)
-    delayMicroseconds(diferencia);
+  float espera = periodo_lectura - (tiempo_final - tiempo_inicial);
+
+  if(espera > 0)
+    delayMicroseconds(periodo_lectura - (tiempo_final - tiempo_inicial));
 }
 
 
@@ -104,7 +110,7 @@ int procesar_valor_pote(int valor_pote){
     return map(valor_pote, MINIMO_POTE, MAXIMO_POTE, MINIMO, MAXIMO);
 }
 
-int convertir_a_angulo(int valor_pote){
+float convertir_a_angulo(int valor_pote){
   return map(valor_pote, MINIMO_POTE, MAXIMO_POTE, 0, 180);
 }
 
@@ -125,13 +131,14 @@ void matlab_send(float dato1, float dato2, float dato3){
 void obtener_angulo_giroscopo_x() {
   sensors_event_t a, g, temp;
   mpu.getEvent(&a, &g, &temp);
-  
+  aux_giro_x = g.gyro.x;
   angulo_gir_x = angulo_x + (g.gyro.x-offset_giro_x) * (periodo_lectura/1e6) * 180 / M_PI; 
 }
 
 void obtener_angulo_accel_x() {
   sensors_event_t a, g, temp;
   mpu.getEvent(&a, &g, &temp);
-
+  aux_accel_y = a.acceleration.y;
+  aux_accel_z = a.acceleration.z;
   angulo_accel_x  = atan2(a.acceleration.y-offset_accel_y, a.acceleration.z-offset_accel_z) * 180 / M_PI;
 }

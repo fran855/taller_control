@@ -26,10 +26,9 @@ uint16_t periodo_lectura;
 uint16_t tiempo_inicial = 0;
 uint16_t tiempo_final = 0;
 
-float offset_giro_x = -0.04;
-
-float offset_accel_y = -0.03;
-float offset_accel_z = 0.17;
+float offset_giro_x = -0.04303;
+float offset_accel_y = 0.1123;
+float offset_accel_z = 0.0400;
 
 float angulo_gir_x = 0;
 float angulo_accel_x = 0;
@@ -66,15 +65,17 @@ void setup() {
   pinMode(PIN_PWM, OUTPUT);
   config_50_hz();
   periodo_lectura = 1e6/FRECUENCIA_LECTURA;
-  OCR1A = 3200;
-  delay(1000);
+  OCR1A = angulo_a_servo(90);
+  delay(4000);
+  OCR1A = angulo_a_servo(95);
+  delay(500);
 }
 
 void loop() {
   // Utilizamos millis() en lugar de micros() porque esta última llega hasta 65536 (2^16) y necesitaríamos del orden de los 10^6 para 10 Hz
   tiempo_inicial = micros();
   float angulo_a_mover;
-  
+
   obtener_angulo_giroscopo_x();
   obtener_angulo_accel_x();
   
@@ -96,10 +97,12 @@ void loop() {
 
   OCR1A = angulo_a_servo(angulo_a_mover);
 
-  matlab_send(u_actual, error_actual, angulo_x);
+  matlab_send(angulo_x, angulo_a_mover, error_actual, i_actual);
 
   tiempo_final = micros();
-  delayMicroseconds(periodo_lectura - (tiempo_final - tiempo_inicial));
+  int diferencia = periodo_lectura - (tiempo_final - tiempo_inicial);
+  if(diferencia > 0)
+    delayMicroseconds(diferencia);
 }
 
 
@@ -122,13 +125,15 @@ int angulo_a_servo(float angulo){
   return map(angulo, 0, 180, MINIMO, MAXIMO);
 }
 
-void matlab_send(float dato1, float dato2, float dato3){
+void matlab_send(float dato1, float dato2, float dato3, float dato4){
   Serial.write("abcd");
   byte * b = (byte *) &dato1;
   Serial.write(b,4);
   b = (byte *) &dato2;
   Serial.write(b,4);
   b = (byte *) &dato3;
+  Serial.write(b,4);
+  b = (byte *) &dato4;
   Serial.write(b,4);
 }
 
