@@ -89,7 +89,7 @@ void loop() {
 
   float angulo_pote = convertir_a_angulo(analogRead(PIN_POTE));
 
-  matlab_send(angulo_x, 0, 0);
+  matlab_send(angulo_x, angulo_pote, 0);
 
   tiempo_final = micros();
   float espera = periodo_lectura - (tiempo_final - tiempo_inicial);

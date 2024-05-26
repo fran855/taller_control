@@ -40,14 +40,19 @@ float referencia = 0;
 float alpha = 0.98;
 float T = 0.01;
 
-float kp = 0.8;
-float ki = 3;
+//float kp = 0.6;
+//float ki = 6;
+float kp = 0.4;
+float ki = 0.1;
+float kd = 0.001;
 
 float error_actual = 0;
 float error_anterior = 0;
 float u_actual = 0;
 float i_actual = 0;
 float i_anterior = 0;
+float d_actual = 0;
+float d_anterior = 0;
 
 void setup() {
   Serial.begin(115200);
@@ -68,7 +73,7 @@ void setup() {
   config_50_hz();
   periodo_lectura = 1e6/FRECUENCIA_LECTURA;
   OCR1A = angulo_a_servo(90);
-  delay(2000);
+  delay(4000);
 }
 
 void loop() {
@@ -81,14 +86,19 @@ void loop() {
   
   angulo_x = alpha*angulo_gir_x + (1-alpha)*angulo_accel_x;
 
-  i_actual = i_anterior + T/2 * error_actual + T/2 * error_anterior;
   error_actual = angulo_x - referencia;
-  u_actual = kp * error_actual + ki * i_actual;
+
+  i_actual = i_anterior + T/2 * error_actual + T/2 * error_anterior;
+  d_actual = 2 * (error_actual - error_anterior) / T - d_anterior;
+  
+  
+  u_actual = kp * error_actual + ki * i_actual + kd * d_actual;
 
   angulo_a_mover = u_actual + 90;
 
   error_anterior = error_actual;
   i_anterior = i_actual;
+  d_anterior = d_actual;
 
   if(angulo_a_mover > LIMITE_ANGULO_SUPERIOR)
     angulo_a_mover = LIMITE_ANGULO_SUPERIOR;
@@ -97,7 +107,7 @@ void loop() {
 
   OCR1A = angulo_a_servo(angulo_a_mover);
 
-  matlab_send(angulo_x, angulo_a_mover, error_actual, i_actual);
+  matlab_send(angulo_x, angulo_a_mover, i_actual, d_actual);
 
   tiempo_final = micros();
   int diferencia = periodo_lectura - (tiempo_final - tiempo_inicial);

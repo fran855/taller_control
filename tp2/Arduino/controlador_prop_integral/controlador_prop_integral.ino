@@ -30,7 +30,7 @@ float offset_giro_x = -0.04303;
 float offset_accel_y = 0.1123;
 float offset_accel_z = 0.0400;
 
-float w_giro_x = 0;
+float w_giro_x = 0.0;
 
 float angulo_gir_x = 0;
 float angulo_accel_x = 0;
@@ -40,14 +40,13 @@ float referencia = 0;
 float alpha = 0.98;
 float T = 0.01;
 
-float kp = 0.8;
-float ki = 3;
-
-float error_actual = 0;
-float error_anterior = 0;
-float u_actual = 0;
-float i_actual = 0;
-float i_anterior = 0;
+float kp = 0.2;
+float ki = 0.1;
+float error_actual = 0.0;
+float error_anterior = 0.0;
+float u_actual = 0.0;
+float i_actual = 0.0;
+float i_anterior = 0.0;
 
 void setup() {
   Serial.begin(115200);
@@ -81,8 +80,9 @@ void loop() {
   
   angulo_x = alpha*angulo_gir_x + (1-alpha)*angulo_accel_x;
 
-  i_actual = i_anterior + T/2 * error_actual + T/2 * error_anterior;
   error_actual = angulo_x - referencia;
+  i_actual = i_anterior + T/2 * error_actual + T/2 * error_anterior;
+
   u_actual = kp * error_actual + ki * i_actual;
 
   angulo_a_mover = u_actual + 90;
@@ -97,7 +97,7 @@ void loop() {
 
   OCR1A = angulo_a_servo(angulo_a_mover);
 
-  matlab_send(angulo_x, angulo_a_mover, error_actual, i_actual);
+  matlab_send(angulo_a_mover, error_actual, i_actual, u_actual);
 
   tiempo_final = micros();
   int diferencia = periodo_lectura - (tiempo_final - tiempo_inicial);

@@ -83,7 +83,7 @@ void loop() {
 
   OCR1A = angulo_a_servo(angulo_a_mover);
 
-  matlab_send(angulo_x, angulo_a_mover, error);
+  matlab_send(angulo_x, 0, 0);
 
   tiempo_final = micros();
   
