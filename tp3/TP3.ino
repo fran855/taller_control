@@ -46,8 +46,10 @@ float phi_est[2] = {0, 0};
 float dphi_est[2] = {0, 0};
 
 float phi_abs = 90;
-float phi_ref = 135;
+float phi_ref = 90;
 float theta_ref = 0;
+
+float u = 0;
 
 // Para el integral (valores en k-1)
 float phi_ref_1 = 0;
@@ -59,15 +61,17 @@ float q = 0;
 float Ad[4][4] = {{1, 0.01, 0, 0}, {-0.5765, 0.9895, -2.1322, -0.2132}, {0, 0, 1, 0.01}, {0, 0, -2.5, 0.75}};
 float Bd[4] = {0, 2.1323, 0, 2.50};
 float Cd[2][4] = {{1, 0, 0, 0}, {0, 0, 1, 0}};
-float L[4][2] = {{1.6395, -0.2132}, {65.7085, -31.7607}, {0, 1.4}, {0, 30.5}};
-float K[4] = {0.5, 0.001, 0.45, 0.005};
+//float L[4][2] = {{1.6395, -0.2132}, {65.7085, -31.7607}, {0, 1.4}, {0, 30.5}};
+float L[4][2] = {{1.7895, -0.2132}, {78.3016, -34.9591}, {0, 1.55}, {0, 39.5}};
+float K[4] = {0.5, 0.001, 0.7, 0.005};
+float KI[4] = {0.4473, -0.0038, 0.6962, 0.0023};
 
 // Feedforward {theta, phi}
 //float F[2] = {0, 0.5};
-float F[2] = {0.0224, 0.5658};
+float F[2] = {0.0224, 0.5};
 
 // Accion Integral
-float H[2] = {0.005, 0};
+float H[2] = {0.01, 0};
 
 bool primera_iteracion = true;
 
@@ -103,9 +107,9 @@ void setup() {
 void loop() {
   tiempo_inicial = micros();
 
-  //while (Serial.available() > 0) {
-  //  phi_ref = Serial.read();
-  //}
+  while (Serial.available() > 0) {
+    phi_ref = Serial.read();
+  }
 
   obtener_angulo_giroscopo_x();
   obtener_angulo_accel_x();
@@ -118,10 +122,10 @@ void loop() {
   phi = convertir_a_angulo(analogRead(PIN_POTE));
   
   // Observador
-  theta_est[1] = Ad[0][0] * theta_est[0] + Ad[0][1] * dtheta_est[0] + Ad[0][2] * phi_est[0] + Ad[0][3] * dphi_est[0] + L[0][0] * (theta - (Cd[0][0] * theta_est[0] + Cd[0][1] * dtheta_est[0] + Cd[0][2] * phi_est[0] + Cd[0][3] * dphi_est[0])) + L[0][1] * (phi - (Cd[1][0] * theta_est[0] + Cd[1][1] * dtheta_est[0] + Cd[1][2] * phi_est[0] + Cd[1][3] * dphi_est[0])) + Bd[0] * phi_ref;
-  dtheta_est[1] = Ad[1][0] * theta_est[0] + Ad[1][1] * dtheta_est[0] + Ad[1][2] * phi_est[0] + Ad[1][3] * dphi_est[0] + L[1][0] * (theta - (Cd[0][0] * theta_est[0] + Cd[0][1] * dtheta_est[0] + Cd[0][2] * phi_est[0] + Cd[0][3] * dphi_est[0])) + L[1][1] * (phi - (Cd[1][0] * theta_est[0] + Cd[1][1] * dtheta_est[0] + Cd[1][2] * phi_est[0] + Cd[1][3] * dphi_est[0])) + Bd[1] * phi_ref;
-  phi_est[1] = Ad[2][0] * theta_est[0] + Ad[2][1] * dtheta_est[0] + Ad[2][2] * phi_est[0] + Ad[2][3] * dphi_est[0] + L[2][0] * (theta - (Cd[0][0] * theta_est[0] + Cd[0][1] * dtheta_est[0] + Cd[0][2] * phi_est[0] + Cd[0][3] * dphi_est[0])) + L[2][1] * (phi - (Cd[1][0] * theta_est[0] + Cd[1][1] * dtheta_est[0] + Cd[1][2] * phi_est[0] + Cd[1][3] * dphi_est[0])) + Bd[2] * phi_ref;
-  dphi_est[1] = Ad[3][0] * theta_est[0] + Ad[3][1] * dtheta_est[0] + Ad[3][2] * phi_est[0] + Ad[3][3] * dphi_est[0] + + L[3][0] * (theta - (Cd[0][0] * theta_est[0] + Cd[0][1] * dtheta_est[0] + Cd[0][2] * phi_est[0] + Cd[0][3] * dphi_est[0])) + L[3][1] * (phi - (Cd[1][0] * theta_est[0] + Cd[1][1] * dtheta_est[0] + Cd[1][2] * phi_est[0] + Cd[1][3] * dphi_est[0])) + Bd[3] * phi_ref;
+  theta_est[1] = Ad[0][0] * theta_est[0] + Ad[0][1] * dtheta_est[0] + Ad[0][2] * phi_est[0] + Ad[0][3] * dphi_est[0] + L[0][0] * (theta - theta_est[0]) + L[0][1] * (phi - phi_est[0]) + Bd[0] * (phi_abs + u);
+  dtheta_est[1] = Ad[1][0] * theta_est[0] + Ad[1][1] * dtheta_est[0] + Ad[1][2] * phi_est[0] + Ad[1][3] * dphi_est[0] + L[1][0] * (theta - theta_est[0]) + L[1][1] * (phi - phi_est[0]) + Bd[1] * (phi_abs + u);
+  phi_est[1] = Ad[2][0] * theta_est[0] + Ad[2][1] * dtheta_est[0] + Ad[2][2] * phi_est[0] + Ad[2][3] * dphi_est[0] + L[2][0] * (theta - theta_est[0]) + L[2][1] * (phi - phi_est[0]) + Bd[2] * (phi_abs + u);
+  dphi_est[1] = Ad[3][0] * theta_est[0] + Ad[3][1] * dtheta_est[0] + Ad[3][2] * phi_est[0] + Ad[3][3] * dphi_est[0] + + L[3][0] * (theta - theta_est[0]) + L[3][1] * (phi - phi_est[0]) + Bd[3] * (phi_abs + u);
 
   theta_est[0] = theta_est[1];
   dtheta_est[0] = dtheta_est[1];
@@ -141,10 +145,10 @@ void loop() {
   }
   
   // Controlador
-  float u = controlador_con_h(theta, dtheta, phi, dphi);
+  u = controlador_con_f(theta_est[1], dtheta, phi_est[1], dphi_est[1]);
   OCR1A = angulo_a_servo(phi_abs + u);
 
-  matlab_send(theta, dtheta, phi, dphi, u, 0, 0);
+  matlab_send(theta, theta_est[1], dtheta, dtheta_est[1], phi, phi_est[1], dphi_est[1]);
 
   tiempo_final = micros();
   delayMicroseconds(periodo_lectura - (tiempo_final - tiempo_inicial));
@@ -182,14 +186,13 @@ float controlador_sin_f(float theta, float dtheta, float phi, float dphi) {
 }
 
 float controlador_con_f(float theta, float dtheta, float phi, float dphi) {
-  return K[0] * theta + K[1] * dtheta + K[2] * (phi - phi_abs) + K[3] * dphi - (F[0] * theta_ref + F[1] * (phi_ref - phi_abs));
+  return K[0] * theta + K[1] * dtheta + K[2] * (phi - phi_abs) + K[3] * dphi + F[0] * theta_ref + F[1] * (phi_ref - phi_abs);
 }
 
 float controlador_con_h(float theta, float dtheta, float phi, float dphi) {
-  float q_actual = phi - phi_ref;
+  float q_actual = phi_ref - phi;
   q = q_actual + q;
-  float u =  K[0] * theta + K[1] * dtheta + K[2] * (phi - phi_ref) + K[3] * dphi + H[0] * q_actual;
-  return u;
+  return KI[0] * theta + KI[1] * dtheta + KI[2] * (phi - phi_abs) + KI[3] * dphi + H[0] * q;
 }
 
 void obtener_angulo_giroscopo_x() {
