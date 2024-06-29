@@ -83,7 +83,7 @@ void setup() {
   pinMode(PIN_PWM, OUTPUT);
   config_50_hz();
   periodo_lectura = 1e6/FRECUENCIA_LECTURA;
-  OCR1A = 5100;
+  OCR1A = 3200;
   delay(1000);
 }
 
@@ -105,7 +105,7 @@ void loop() {
   w_k = w_k_1;
   b_k = b_k_1;
 
-  matlab_send(angulo_x, theta_k_1, velocidad, w_k_1, b_k_1);
+  matlab_send(angulo_x, theta_k_1, velocidad, w_k_1 + b_k_1, b_k_1);
 
   tiempo_final = micros();
   delayMicroseconds(periodo_lectura - (tiempo_final - tiempo_inicial));

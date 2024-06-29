@@ -41,7 +41,7 @@ float alpha = 0.98;
 float T = 0.01;
 
 float kp = 0.2;
-float ki = 0.1;
+float ki = 6;
 float error_actual = 0.0;
 float error_anterior = 0.0;
 float u_actual = 0.0;
